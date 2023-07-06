@@ -16,7 +16,7 @@ const pool = new Pool({
 });
 
 const indexRouter = require('./routes/index')(pool);
-const usersRouter = require('./routes/users');
+const usersRouter = require('./routes/users')(pool);
 
 
 var app = express();
@@ -39,6 +39,10 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
+app.use((req, res, next) => {
+  res.locals.username = req.session.name; // Make session name available as a local variable
+  next();
+});
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

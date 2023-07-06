@@ -13,7 +13,7 @@ module.exports = (pool) => {
     } else {
       res.redirect('/login'); // User is not authenticated, redirect to the login page
     }
-  }
+  } 
 
   router.get('/login', function (req, res, next) {
     if (req.session.authenticated) {
@@ -63,6 +63,9 @@ module.exports = (pool) => {
         res.render('index', { title: 'Dashboard', showLoginForm: true });
     }
 });
+
+//user route
+
 
 
   // Logout route
