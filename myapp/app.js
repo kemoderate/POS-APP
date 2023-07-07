@@ -17,6 +17,7 @@ const pool = new Pool({
 
 const indexRouter = require('./routes/index')(pool);
 const usersRouter = require('./routes/users')(pool);
+const unitsRouter = require('./routes/units')(pool);
 
 
 var app = express();
@@ -46,6 +47,7 @@ app.use((req, res, next) => {
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/units', unitsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

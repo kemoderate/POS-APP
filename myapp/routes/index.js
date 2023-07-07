@@ -64,10 +64,6 @@ module.exports = (pool) => {
     }
 });
 
-//user route
-
-
-
   // Logout route
   router.get('/logout', (req, res) => {
     req.session.destroy((err) => {
@@ -82,7 +78,6 @@ module.exports = (pool) => {
 
   router.get('/register', function (req, res, next) {
     res.render('register', { title: 'Register' });
-
   });
 
   router.post('/register', async (req, res) => {
@@ -91,7 +86,7 @@ module.exports = (pool) => {
     const userid = uuidv4(); // Generate a unique userid using uuidv4()
   
     try {
-      await pool.query('INSERT INTO users (userid, email, name, password, role) VALUES ($1, $2, $3, $4, $5)', [userid, email, name, hashedPassword, 'guest']);
+      await pool.query('INSERT INTO users (userid, email, name, password, role) VALUES ($1, $2, $3, $4, $5)', [userid, email, name, hashedPassword, 'operator']);
       res.redirect('/');
     } catch (error) {
       console.error('Error inserting user:', error);

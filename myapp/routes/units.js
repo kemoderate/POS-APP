@@ -8,15 +8,15 @@ module.exports = (pool) => {
     let params = []
 
     if(req.query.search.value){
-        params.push(`name ilike '%${req.query.search.value}%'`)
+        params.push(`string ilike '%${req.query.search.value}%'`)
     }
     const limit = req.query.length
     const offset = req.query.start
     const sortBy = req.query.columns[req.query.order[0].column].data
     const sortMode = req.query.order[0].dir
 
-    const total = await pool.query(`select count(*) as total from users${params.length > 0 ? ` where ${params.join(' or ')}` : ''}`)
-    const data = await pool.query(`select * from users${params.length > 0 ? ` where ${params.join(' or ')}` : ''} order by ${sortBy} ${sortMode} limit ${limit} offset ${offset} `)
+    const total = await pool.query(`select count(*) as total from units${params.length > 0 ? ` where ${params.join(' or ')}` : ''}`)
+    const data = await pool.query(`select * from units${params.length > 0 ? ` where ${params.join(' or ')}` : ''} order by ${sortBy} ${sortMode} limit ${limit} offset ${offset} `)
     
     const response = {
         "draw": Number(req.query.draw),
@@ -31,13 +31,13 @@ module.exports = (pool) => {
   router.get('/', function (req, res, next) {
     // Retrieve the user's name from the session or database
     const name = req.session.user?.name; // Replace this wi th your actual logic to retrieve the user's name
-   let sql = 'select * from users';
+   let sql = 'select * from units';
     
    pool.query(sql, (err, result) => {
     if (err) {
       console.error(err);
     } else {
-      res.render('user', {
+      res.render('units', {
         title: 'User Profile',
         data: result.rows,
         name: name
@@ -49,13 +49,13 @@ module.exports = (pool) => {
   router.get('/add', (req, res, next) => {
     const name = req.session.user?.name;
 
-    let sql = `SELECT * FROM users`;
+    let sql = `SELECT * FROM units`;
 
     pool.query(sql, (err, result) => {
       if (err) {
         console.error(err);
       } else {
-        res.render('adduser', {
+        res.render('addunits', {
           title: 'User Add',
           data: result.rows,
           name: name
@@ -65,25 +65,25 @@ module.exports = (pool) => {
   });
 
   router.post('/add', (req, res) => {
-    const { email, name, password, role } = req.body;
-    pool.query('INSERT INTO users (email, name, password, role) VALUES ($1, $2, $3, $4)', [email, name, password, role], (err, result) => {
+    const { unit, name, note } = req.body;
+    pool.query('INSERT INTO units (unit, name, note) VALUES ($1, $2, $3)', [unit, name, note], (err, result) => {
       if (err) {
-        console.error('Error inserting user:', err);
+        console.error('Error inserting unit:', err);
         // Handle the error, e.g., render an error page
       } else {
-        console.log('User added successfully');
-        res.redirect('/users');
+        console.log('Unit added successfully');
+        res.redirect('/units');
       }
     });
   });
 
 
   router.get('/edit/:userid', function (req, res, next) {
-    const userid = req.params.userid;
+    const unit = req.params.unit;
     const name = req.session.user?.name;
   
     // Fetch the user data from the database based on the userid
-    pool.query('SELECT * FROM users WHERE userid = $1', [userid], (error, result) => {
+    pool.query('SELECT * FROM units WHERE unit = $1', [unit], (error, result) => {
       if (error) {
         console.error('Error retrieving user data:', error);
         // Handle the error and render an error page
@@ -99,7 +99,7 @@ module.exports = (pool) => {
     const { email, name, password, role } = req.body
 
     pool.query(
-      'UPDATE users SET email = $1, name = $2, password = $3, role = $4 WHERE userid = $5',
+      'UPDATE units SET email = $1, name = $2, password = $3, role = $4 WHERE userid = $5',
       [email, name, password, role, userId],
       (error, result) => {
         if (error) {
@@ -107,7 +107,7 @@ module.exports = (pool) => {
           // Handle the error and render an error page
         } else {
           // Redirect to the user list page or any other appropriate page
-          res.redirect('/users');
+          res.redirect('/units');
         }
       }
     )
@@ -117,17 +117,16 @@ module.exports = (pool) => {
   router.get('/delete/:userid', (req, res) => {
     const userid = req.params.userid;
 
-    pool.query('DELETE FROM users WHERE userid = $1', [userid], (err, result) => {
+    pool.query('DELETE FROM units WHERE userid = $1', [userid], (err, result) => {
       if (err) {
         console.error('Error deleting user:', err);
         res.sendStatus(500); // Respond with an appropriate status code indicating the failure
       } else {
         console.log('User deleted successfully');
-        res.redirect('/users'); // Redirect to the user list page after deletion
+        res.redirect('/units'); // Redirect to the user list page after deletion
       }
     });
   });
-  
 
 
   return router;
