@@ -7,7 +7,7 @@ const saltRounds = 10;
 
 
 module.exports = (pool) => {
-  function requireAuth(req, res, next) {
+  function isLoggedIn(req, res, next) {
     if (req.session.authenticated) {
       next(); // User is authenticated, continue to the next middleware/route handler
     } else {
@@ -55,7 +55,7 @@ module.exports = (pool) => {
     });
   });
 
-  router.get('/', requireAuth, (req, res) => {
+  router.get('/', isLoggedIn, (req, res) => {
     if (req.session.authenticated) {
       const name = req.session.user.name;
         res.render('index', { title: 'Dashboard', name: name });

@@ -10,22 +10,15 @@
   <script src="https://kit.fontawesome.com/6ea2cb925f.js" crossorigin="anonymous"></script>
   <title>POS - Goods</title>
 
-  <!-- Custom fonts for this template -->
+  <!-- Custom fonts for this template-->
   <link href="/sbadmin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
   <link
-      href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-      rel="stylesheet">
-
-  <!-- Custom styles for this template -->
-  <link href="/sbadmin/css/sb-admin-2.min.css" rel="stylesheet">
-
-  <!-- Custom styles for this page -->
+    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    rel="stylesheet" />
   <link href="/sbadmin/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-  <style>
-    .hidden {
-      display: none;
-    }
-  </style>
+
+  <!-- Custom styles for this template-->
+  <link rel="stylesheet" href="/stylesheets/sb-admin-2.min.css" />
 </head>
 
 <body id="page-top">
@@ -45,7 +38,7 @@
             <div class="container-fluid">
               <!-- Begin Page Content -->
               <h1 class="h3 mb-2 text-gray-800">Goods</h1>
-              <h5>This is data of Goods</h5>
+              <h5>This is page of Goods</h5>
               <div class="card shadow mb-4">
                 <div class="card-header py-3">
                   <a href="/goods/add" class="btn btn-primary btn-icon-split">
@@ -55,181 +48,184 @@
                     <span class="text">Add</span>
                   </a>
                 </div>
-                <div id="unitList" class="card-body">
-                  <div class="table-responsive">
-                    <table class="table table-bordered" id="example" width="100%" cellspacing="0">
-                      <thead>
-                        <tr>
-                          <th>Barcode</th>
-                          <th>Name</th>
-                          <th>Stock</th>
-                          <th>Purchase Price</th>
-                          <th>Selling Price</th>
-                          <th>Unit</th>
-                          <th>Picture</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                    <tbody>
-                      <% let counter = 1; %>
-                      <% data.forEach((user) => { %>
-                      <tr align="left">
-                        <td><%= counter %></td>
-                        <td class="hidden"><%= user.userid %></td>
-                            <td>
-                              <a class="btn btn-success btn-circle" href="/goods/edit/<%= user.barcode %>">
-                                <span class="icon text-white-50">
-                                  <i class="fas fa-info-circle"></i>
-                                </span>
-                              </a>
-                            <a class="btn btn-danger btn-circle delete-btn" href="#" data-id="<%= user.barcode %>" data-toggle="modal" data-target="#deleteModal">
-                              <span class="icon text-white-50">
-                                <i class="fas fa-trash"></i>
-                              </span>
-                            </a>
-                            </td>
-                          </tr>
-                          <% counter++; %>
-                      <% }) %>
-                    </tbody>
-                      <tfoot>
-                        <tr>
-                          <th>Barcode</th>
-                          <th>Name</th>
-                          <th>Stock</th>
-                          <th>Purchase Price</th>
-                          <th>Selling Price</th>
-                          <th>Unit</th>
-                          <th>Picture</th>
-                          <th>Actions</th>
-                        </tr>
-                      </tfoot>
+                <div class="card-body">
+                  <%if (error.length> 0){%>
+                    <div class="alert alert-danger" role="alert">
+                      <%= error %>
+                    </div>
+                    <%}%>
+                      <div class="table-responsive">
+                        <table class="table table-bordered" id="goodsid" width="100%" cellspacing="0">
+                          <thead>
+                            <tr>
+                              <th>Barcode</th>
+                              <th>Name</th>
+                              <th>Stock</th>
+                              <th>Unit</th>
+                              <th>Purchaseprice</th>
+                              <th>Sellingprice</th>
+                              <th>Picture</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tfoot>
+                            <tr>
+                              <th>Barcode</th>
+                              <th>Name</th>
+                              <th>Stock</th>
+                              <th>Unit</th>
+                              <th>Purchaseprice</th>
+                              <th>Sellingprice</th>
+                              <th>Picture</th>
+                              <th>Action</th>
+                            </tr>
+                          </tfoot>
 
-                    </table>
-                  </div>
+                        </table>
+                      </div>
                 </div>
               </div>
+
+              <!-- /.container-fluid -->
             </div>
-            <!-- /.container-fluid -->
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <%- include('partials/footer.ejs') %>
+              <!-- End of Footer -->
         </div>
-        <!-- End of Main Content -->
-
-        <!-- Pagination -->
-
-        <!-- Footer -->
-        <%- include('partials/footer.ejs') %>
-          <!-- End of Footer -->
+        <!-- End of Content Wrapper -->
       </div>
-      <!-- End of Content Wrapper -->
-  </div>
-  <!-- End of Page Wrapper -->
+      <!-- End of Page Wrapper -->
 
-  <!-- Scroll to Top Button-->
-  <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-  </a>
-  <!-- delete Modal-->
-  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Deleted Confirmation</h5>
-          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">×</span>
-          </button>
-        </div>
-        <div class="modal-body">Are you sure, you want delete it?</div>
-        <div class="modal-footer">
-          <a class="btn btn-secondary" data-dismiss="modal">No</a>
-          <a class="btn btn-primary" id="confirmDeleteBtn" href="/goods">Yes</a>
+      <!-- Scroll to Top Button-->
+      <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+      </a>
+
+      <!-- delete Modal-->
+      <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Deleted Confirmation</h5>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <div class="modal-body">Are you sure, you want delete it?</div>
+            <div class="modal-footer">
+              <a class="btn btn-secondary" data-dismiss="modal">No</a>
+              <a class="btn btn-primary" id="confirmDeleteBtn" href="/goods">Yes</a>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-  <!-- Logout Modal-->
-  <%- include('partials/logoutModal.ejs') %>
-  <!-- Bootstrap core JavaScript-->
-  <script src="/sbadmin/vendor/jquery/jquery.min.js"></script>
-  <script src="/sbadmin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Core plugin JavaScript-->
-  <script src="/sbadmin/vendor/jquery-easing/jquery.easing.min.js"></script>
+      <!-- Logout Modal-->
+      <%- include('partials/logoutModal.ejs') %>
+        <script src="/sbadmin/vendor/jquery/jquery.min.js"></script>
+        <script src="/sbadmin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Custom scripts for all pages-->
-  <script src="/sbadmin/js/sb-admin-2.min.js"></script>
+        <!-- Core plugin JavaScript-->
+        <script src="/sbadmin/vendor/jquery-easing/jquery.easing.min.js"></script>
 
-  <!-- Page level plugins -->
-  <script src="/sbadmin/vendor/datatables/jquery.dataTables.min.js"></script>
-  <script src="/sbadmin/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+        <!-- Custom scripts for all pages-->
+        <script src="/sbadmin/js/sb-admin-2.min.js"></script>
 
-  <!-- Page level custom scripts -->
-  <script src="/sbadmin/js/demo/datatables-demo.js"></script>
+        <!-- Page level plugins -->
+        <script src="/sbadmin/vendor/datatables/jquery.dataTables.min.js"></script>
+        <script src="/sbadmin/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
-    <script>
-      // Get the confirm delete button in the modal
-      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        <script>
+          $(document).ready(function () {
+            var deleteId;
 
-      // Attach click event listeners to each delete button
-      const deleteButtons = document.querySelectorAll('.delete-btn');
-      deleteButtons.forEach((button) => {
-        button.addEventListener('click', (event) => {
-          event.preventDefault();
+            $(document).on('click', '.btn-danger', function (event) {
+              event.preventDefault();
+              deleteId = $(this).data('id');
+              $('#deleteModal').modal('show');
+            });
 
-          // Retrieve the user ID from the data-id attribute
-          const unitId = button.dataset.id;
-
-          // Set the URL for the delete request
-          confirmDeleteBtn.href = `/goods/delete/${unitId}`;
-        });
-      });
-    </script>
-    <script>
-      $(document).ready(function () {
-        $('#example').DataTable({
-          "lengthMenu": [[3, 10, 100], [3, 10, "All"]],
-          "processing": true,
-          "serverSide": true,
-          "ajax": "goods/datatable",
-          "columns": [
-            { "data": "barcode" },
-            { "data": "name" },
-            { "data": "stock" },
-            { "data": "purchaseprice" },
-            { "data": "sellingprice" },
-            { "data": "unit" },
-            {
-          "data": "picture",
-          "render": function (data, type, row) {
-            if (type === "display" && data) {
-              return '<img src="/uploads/' + data + '" width="250" height="250">';
-            }
-            return data;
-          }
-        },  
-            {
-              "render": function (data, type, row) {
-                return `
-                        <td>
-                            <a class="btn btn-success btn-circle" href="/goods/edit/${row.unit}">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-info-circle"></i>
-                                </span>
-                            </a>
-                            <a class="btn btn-danger btn-circle" href="#" data-toggle="modal" data-id="${row.unit}" data-target="#deleteModal">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                            <span></span>
-                        </td>
-                    `;
+            $('#confirmDeleteBtn').on('click', function (event) {
+              event.preventDefault();
+              if (deleteId) {
+                $.ajax({
+                  url: '/goods/delete/' + deleteId,
+                  type: 'GET',
+                  success: function () {
+                    console.log('Data berhasil dihapus');
+                    $('#deleteModal').modal('hide');
+                    location.reload(); // Memuat ulang halaman setelah penghapusan berhasil
+                  },
+                  error: function () {
+                    console.log('Terjadi kesalahan saat menghapus data');
+                  }
+                });
               }
-            }
-          ]
-        });
-      });
-    </script>
+            });
+          });
+        </script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+
+        <script>
+          $(document).ready(function () {
+            $('#goodsid').DataTable({
+              "lengthMenu": [[3, 10, 100], [3, 10, "All"]],
+              "processing": true,
+              "serverSide": true,
+              "ajax": "goods/datatable",
+              "columns": [
+                { "data": "barcode" },
+                { "data": "name" },
+                { "data": "stock" },
+                { "data": "unit" },
+                {
+                  "data": "purchaseprice",
+                  "render": function (data, type, row) {
+                    return 'Rp ' + numeral(data).format('0,0.00');
+                  }
+                },
+                {
+                  "data": "sellingprice",
+                  "render": function (data, type, row) {
+                    return 'Rp ' + numeral(data).format('0,0.00');
+                  }
+                },
+                {
+                  "data": "picture",
+                  "render": function (data, type, row) {
+                    return `<img src="/images/pictures/${data}" alt="No picture" width="100">`;
+                  }
+                },
+                {
+                  "render": function (data, type, row) {
+                    return `
+              <td>
+                <a class="btn btn-success btn-circle" href="/goods/edit/${row.barcode}">
+                  <span class="icon text-white-50">
+                    <i class="fas fa-info-circle"></i>
+                  </span>
+                </a>
+                <a class="btn btn-danger btn-circle" href="#" data-toggle="modal" data-id="${row.barcode}" data-target="#deleteModal">
+                  <span class="icon text-white-50">
+                    <i class="fas fa-trash"></i>
+                  </span>
+                </a>
+                <span></span>
+              </td>
+            `;
+                  }
+                }
+              ]
+            });
+          });
+
+        </script>
+
+
 </body>
 
 </html>

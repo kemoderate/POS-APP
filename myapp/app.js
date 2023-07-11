@@ -7,6 +7,7 @@ var session = require('express-session');
 const bodyParser = require('body-parser');
 var flash = require("connect-flash");
 const fileUpload = require("express-fileupload");
+const multer = require('multer');
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -16,6 +17,18 @@ const pool = new Pool({
   password: '12345',
   port: 5432,
 });
+
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => {
+    // Generate a unique filename for the uploaded file
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = file.originalname.split('.').pop();
+    cb(null, file.fieldname + '-' + uniqueSuffix + '.' + extension);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 const indexRouter = require('./routes/index')(pool);
 const usersRouter = require('./routes/users')(pool);

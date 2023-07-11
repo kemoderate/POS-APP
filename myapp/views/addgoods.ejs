@@ -13,7 +13,7 @@
       src="https://kit.fontawesome.com/6ea2cb925f.js"
       crossorigin="anonymous"
     ></script>
-    <title>POS - Users</title>
+    <title>POS - Units</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
     <!-- Custom fonts for this template-->
@@ -25,6 +25,12 @@
 
     <!-- Custom styles for this template-->
     <link rel="stylesheet" href="/stylesheets/sb-admin-2.min.css" />
+    <style>
+        #output {
+          max-width: 400px; /* Sesuaikan lebar maksimum yang diinginkan */
+          height: auto;
+        }
+      </style>
   </head>
 
   <body id="page-top">
@@ -41,102 +47,100 @@
           <!-- Topbar -->
           <%- include('partials/topbar.ejs', { name: name }) %>
           <!-- End of Topbar -->
-          <div class="container-fluid">
-            <!-- Begin Page Content -->
-            <h1 class="h3 mb-2 text-gray-800">Users</h1>
-            <div class="card shadow mb-4">
-              <div class="card-header py-3">
-                <% if (typeof dataTable === 'undefined') { %>
+        <div class="container-fluid">
+          <!-- Begin Page Content -->
+          <h1 class="h3 mb-2 text-gray-800">Goods</h1>
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <%if(renderFrom === "add") {%>
                   <span class="m-0 font-weight-bold text-primary">Form Add</span>
-                <% } else { %>
+                  <%} if(renderFrom === "edit") {%>
                   <span class="m-0 font-weight-bold text-primary">Form Edit</span>
-                <% } %>
-              </div>
-              <div class="card-body">
-                <form action="" method="post" enctype="multipart/form-data">
-                  <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                      <tbody>
-                        <tr>
-                          <td>
-                            <div class="mb-3 row">
-                              <label for="barcode" class="col-sm-2 col-form-label">Barcode</label>
-                              <div class="col-sm-10">
-                                <input type="text" class="form-control" id="barcode" name="barcode" value="<%= data.barcode %>">
-                              </div>
-                            </div>
-                            <div class="mb-3 row">
-                              <label for="name" class="col-sm-2 col-form-label">Name</label>
-                              <div class="col-sm-10">
-                                <input type="text" class="form-control" id="name" name="name" value="<%= data.name %>">
-                              </div>
-                            </div>
-                            <div class="mb-3 row">
-                              <label for="stock" class="col-sm-2 col-form-label">Stock</label>
-                              <div class="col-sm-10">
-                                <input type="number" class="form-control" id="stock" name="stock" value="<%= data.stock %>">
-                              </div>
-                            </div>
-                            <div class="mb-3 row">
-                              <label for="purchaseprice" class="col-sm-2 col-form-label">Purchase Price</label>
-                              <div class="col-sm-10">
-                                <input type="number" step="0.01" class="form-control" id="purchaseprice" name="purchaseprice" value="<%= data.purchaseprice %>">
-                              </div>
-                            </div>
-                            <div class="mb-3 row">
-                              <label for="sellingprice" class="col-sm-2 col-form-label">Selling Price</label>
-                              <div class="col-sm-10">
-                                <input type="number" step="0.01" class="form-control" id="sellingprice" name="sellingprice" value="<%= data.sellingprice %>">
-                              </div>
-                            </div>
-                            <div class="mb-3 row">
-                              <label for="unit" class="col-sm-2 col-form-label">Unit</label>
-                              <div class="col-sm-10">
-                                <select class="form-select" name="unit" aria-label="Default select example">
-                                  <option>Open this select menu</option>
-                                  <% item.forEach(function(item) { %>
-                                  <option <%= item.unit === data.unit ? 'selected': '' %>><%= item.unit %></option>
-                                  <% }) %>
-                                </select>
-                              </div>
-                            </div>
-                            <div class="mb-3 row">
-                              <label for="picture" class="col-sm-2 col-form-label">Picture</label>
-                              <div class="col-sm-10">
-                                <input type="file" class="form-control" id="picture" name="picture" accept="image/*" onchange="loadFile(event)" name="picture">
-                              </div>
-                            </div>
-                            <div class="mb-3 row">
-                              <label for="picture" class="col-sm-2 col-form-label">Preview</label>
-                              <div class="col-sm-10">
-                                <img id="output" <%= data.picture ? `src="/images/pictures/${data.picture}"` : '' %>/>
-                              </div>
-                            </div>
-                          </td>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div class="mb-3">
-                    <button type="submit" class="btn btn-success btn-icon-split">
-                      <span class="icon text-white-50">
-                        <i class="fa-solid fa-database"></i>
-                      </span>
-                      <span class="text">Save</span>
-                    </button>
-                    <a href="/goods" class="btn btn-warning btn-icon-split">
-                      <span class="icon text-white-50">
-                        <i class="fa-solid fa-rotate-left"></i>
-                      </span>
-                      <span class="text">Back</span>
-                    </a>
-                  </div>
-                </form>
-              </div>
+                  <% } %>
+              </a>
             </div>
-          </div>
-            
+          <div class="card-body">
+            <%if (error.length > 0){%>
+              <div class="alert alert-danger" role="alert">
+                <%= error %>
+              </div>
+              <%}%>
+            <form action="" method="post" encType="multipart/form-data">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <div class="mb-3 row">
+                        <label for="barcode" class="col-sm-2 col-form-label">Barcode</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="barcode" name="barcode" value="<%= data.barcode %>">
+                        </div>
+                      </div>
+                      <div class="mb-3 row">
+                        <label for="name" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="name" name="name" value="<%= data.name %>">
+                        </div>
+                      </div>
+                      <div class="mb-3 row">
+                        <label for="stock" class="col-sm-2 col-form-label">Stock</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="stock" name="stock" value="<%= data.stock %>">
+                        </div>
+                      </div>
+                      </div>
+                      <div class="mb-3 row">
+                        <label for="purchaseprice" class="col-sm-2 col-form-label">Purchaseprice</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="purchaseprice" name="purchaseprice" value="<%= data.purchaseprice %>">
+                        </div>
+                      </div>
+                      <div class="mb-3 row">
+                        <label for="sellingprice" class="col-sm-2 col-form-label">Sellingprice</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="sellingprice" name="sellingprice" value="<%= data.sellingprice %>">
+                        </div>
+                      </div>
+                      <div class="mb-3 row">
+                        <label for="unit" class="col-sm-2 col-form-label">Unit</label>
+                        <div class="col-sm-10">
+                            <select class="form-select" name="unit" aria-label="Default select example">
+                                <option>Open this select menu</option>
+                                <% item.forEach(function(datas) { %>
+                                <option <%= datas.unit === data.unit ? 'selected': '' %>><%= datas.unit %></option>
+                                <% }) %>
+                              </select>
+                        </div>
+                      </div>
+                      <div class="mb-3 row">
+                        <label for="picture" class="col-sm-2 col-form-label">Picture</label>
+                        <div class="col-sm-10">
+                          <input type="file" class="form-control" id="picture" accept="image/*" onchange="loadFile(event)" name="picture">
+                        </div>
+                      </div>
+                      <div class="mb-3 row">
+                        <label for="picture" class="col-sm-2 col-form-label">Preview</label>
+                        <div class="col-sm-10">
+                            <img id="output" <%- data.picture ? `src = "/images/pictures/${data.picture}"` : '' %>/>
+                        </div>
+                      </div>
+            </div>
+                </table>
+                <button type="submit" class="btn btn-success btn-icon-split">
+                    <span class="icon text-white-50">
+                        <i class="fa-solid fa-database"></i>
+                    </span>
+                    <span class="text">Save</span>
+                </button>
+                <a href="/goods" class="btn btn-warning btn-icon-split">
+                    <span class="icon text-white-50">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </span>
+                    <span class="text">Back</span>
+                </a>
+                <br><br>
+            </div>
+        </form>
+        </div>
+        </div>
           
           <!-- /.container-fluid -->
         </div>
@@ -175,13 +179,13 @@
     <script src="/javascripts/chart-area-demo.js"></script>
     <script src="/javascripts/chart-pie-demo.js"></script>
     <script>
-      var loadFile = function(event) {
-        var output = document.getElementById('output');
-        output.src = URL.createObjectURL(event.target.files[0]);
-        output.onload = function() {
-          URL.revokeObjectURL(output.src) // free memory
-        }
-      };
-    </script>
+        var loadFile = function(event) {
+          var output = document.getElementById('output');
+          output.src = URL.createObjectURL(event.target.files[0]);
+          output.onload = function() {
+            URL.revokeObjectURL(output.src) // free memory
+          }
+        };
+      </script>
   </body>
 </html>

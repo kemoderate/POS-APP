@@ -1,80 +1,86 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-var multer = require('multer');
-var upload = multer({ dest: 'uploads/' });
+var path = require("path");
+const isLoggedIn = require("../helpers/util");
+const isAdmin = require("../helpers/utill");
 
-// 2023060701621 barcode
-/* GET goods listing. */
-module.exports = (pool) => {
-
-  router.get('/datatable', async (req, res) => {
-    let params = []
-
+module.exports = function (pool) {
+  router.get("/datatable", async (req, res) => {
+    let params = [];
     if (req.query.search.value) {
-      params.push(`name ILIKE '%${req.query.search.value}%'`)
+      const searchValue = req.query.search.value;
+      params.push(`barcode ILIKE '%${searchValue}%'`);
+      params.push(`name ILIKE '%${searchValue}%'`);
+      params.push(`unit ILIKE '%${searchValue}%'`);
+      // casting, changing the stock from integer into string
+      params.push(`stock::text ILIKE '%${searchValue}%'`);
     }
-    const limit = req.query.length
-    const offset = req.query.start
-    const sortBy = req.query.columns[req.query.order[0].column].data
-    const sortMode = req.query.order[0].dir
 
-    const total = await pool.query(`SELECT COUNT(*) AS total FROM goods ${params.length > 0 ? `WHERE ${params.join(' OR ')}` : ''}`)
-    const data = await pool.query(`SELECT * FROM goods ${params.length > 0 ? `WHERE ${params.join(' OR ')}` : ''} ORDER BY ${sortBy} ${sortMode} LIMIT ${limit} OFFSET ${offset}`)
+    const limit = req.query.length;
+    const offset = req.query.start;
+    const sortBy = req.query.columns[req.query.order[0].column].data;
+    const sortMode = req.query.order[0].dir;
 
+    const total = await pool.query(
+      `select count(*) as total from goods${
+        params.length > 0 ? ` where ${params.join(" or ")}` : ""
+      }`
+    );
+    const data = await pool.query(
+      `select * from goods${
+        params.length > 0 ? ` where ${params.join(" or ")}` : ""
+      } order by ${sortBy} ${sortMode} limit ${limit} offset ${offset} `
+    );
     const response = {
-      "draw": Number(req.query.draw),
-      "recordsTotal": total.rows[0].total,
-      "recordsFiltered": total.rows[0].total,
-      "data": data.rows
-    }
-    res.json(response)
-  })
-
-
-  router.get('/', function (req, res, next) {
-    // Retrieve the user's name from the session or database
-    const name = req.session.user?.name; // Replace this with your actual logic to retrieve the user's name
-    let sql = 'SELECT * FROM goods';
-
-    pool.query(sql, (err, result) => {
-      if (err) {
-        console.error(err);
-        next(err); // Pass the error to the error handler
-      } else {
-        res.render('goods', {
-          title: 'Goods',
-          data: result.rows,
-          name: name
-        });
-      }
-    });
+      draw: Number(req.query.draw),
+      recordsTotal: total.rows[0].total,
+      recordsFiltered: total.rows[0].total,
+      data: data.rows,
+    };
+    res.json(response);
   });
 
-  router.get('/add', (req, res, next) => {
+  router.get('/', isLoggedIn,  function (req, res, next) {
+    const stockAlert = req.session.stockAlert;
     const name = req.session.user?.name;
-
-    
-    let sql = `SELECT * FROM units`;
-
-    pool.query(sql, (err, result) => {
+    pool.query("select * from goods", (err, data) => {
       if (err) {
-        console.error(err);
-        next(err); // Pass the error to the error handler
-      } else {
-        res.render('addgoods', {
-          title: 'Goods Add',
-          data: {},
-          item: result.rows,
-          name: name,
-          error: req.flash("error"),
-        });
+        console.log(err);
       }
+      res.render('goods', {
+        data: data.rows,
+        user: req.session.user,
+        stockAlert,
+        error: req.flash("error"),
+        name : name
+      });
     });
   });
 
-  router.post('/add', upload.single('picture'), (req, res) => {
-    const { barcode, name, stock, purchaseprice, sellingprice, unit } = req.body;
-    let picture = req.file ? req.files.picture : null; // Get the filename of the uploaded picture
+  router.get("/add", isLoggedIn,  (req, res) => {
+    const stockAlert = req.session.stockAlert;
+    const name = req.session.user?.name;
+    pool.query("select * from units", (err, data) => {
+      res.render("addgoods", {
+        data: {},
+        item: data.rows,
+        renderFrom: "add",
+        user: req.session.user,
+        stockAlert,
+        error: req.flash("error"),
+        name : name
+      });
+    });
+  });
+
+  router.post("/add", (req, res) => {
+    if (!req.files || Object.keys(req.files).length === 0) {
+      req.flash("error", "insert goods data");
+      return res.redirect(`addgoods`);
+    }
+
+    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+    let picture = req.files.picture;
     pictureName = `${Date.now()}-${picture.name}`;
     let uploadPath = path.join(
       __dirname,
@@ -84,80 +90,132 @@ module.exports = (pool) => {
       "pictures",
       pictureName
     );
+
+    // Use the mv() method to place the file somewhere on your server
     picture.mv(uploadPath, function (err) {
       if (err) return res.status(500).send(err);
 
-    pool.query('INSERT INTO goods (barcode, name, stock, purchaseprice, sellingprice, unit, picture) VALUES ($1, $2, $3, $4, $5, $6, $7)', 
-    [barcode, name, stock, purchaseprice, sellingprice, unit, pictureName], (err, result) => {
-      if (err) {
-        console.error('Error inserting goods:', err);
-        res.sendStatus(500); // Respond with an appropriate status code indicating the failure
-      } else {
-        console.log('Goods added successfully');
-        res.redirect('/goods');
-      }
-    });
+      pool.query(
+        "INSERT INTO goods(barcode, name, stock, purchaseprice, sellingprice, picture, unit) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+        [
+          req.body.barcode,
+          req.body.name,
+          req.body.stock,
+          req.body.purchaseprice,
+          req.body.sellingprice,
+          pictureName,
+          req.body.unit,
+        ],
+        (err, data) => {
+          if (err) {
+            console.log(err);
+            req.flash("error", err.message);
+            return res.redirect(`/addgoods`);
+          }
+          res.redirect("/goods");
+        }
+      );
     });
   });
 
-  router.get('/edit/:barcode', function (req, res, next) {
-    const barcode = req.params.barcode;
-    const name = req.session.user?.name;
+  router.get("/edit/:id", isLoggedIn, isAdmin, (req, res) => {
+    const id = req.params.id;
+    const stockAlert = req.session.stockAlert;
+    pool.query("select * from goods where barcode = $1", [id], (err, items) => {
+      pool.query("select * from units", (err, data) => {
+        if (err) {
+          console.log(err);
+        }
+        res.render("addgoods", {
+          data: items.rows[0],
+          item: data.rows,
+          renderFrom: "edit",
+          user: req.session.user,
+          stockAlert,
+          error: req.flash("error"),
+        });
+      });
+    });
+  });
 
-    // Fetch the goods data from the database based on the barcode
-    pool.query('SELECT * FROM goods WHERE barcode = $1', [barcode], (error, result) => {
-      if (error) {
-        console.error('Error retrieving goods data:', error);
-        next(error); // Pass the error to the error handler
-      } else {
-        const goods = result.rows[0];
-        let sql = `SELECT * FROM goods`;
-
-        pool.query(sql, (err, unitResult) => {
+  router.post("/edit/:id", (req, res) => {
+    const id = req.params.id;
+    if (!req.files || Object.keys(req.files).length === 0) {
+      pool.query(
+        "UPDATE goods SET barcode=$1, name=$2, stock=$3, purchaseprice=$4, sellingprice=$5, unit=$6 WHERE barcode=$7",
+        [
+          req.body.barcode,
+          req.body.name,
+          req.body.stock,
+          req.body.purchaseprice,
+          req.body.sellingprice,
+          req.body.unit,
+          id,
+        ],
+        function (err) {
           if (err) {
             console.error(err);
-            next(err); // Pass the error to the error handler
+            req.flash("error", err.message);
+            return res.redirect(`/goods/edit/${id}`);
           } else {
-            res.render('addgoods', { title: 'Edit Goods', goods: goods, units: unitResult.rows, name: name });
+            res.redirect("goods");
           }
-        });
-      }
-    });
+        }
+      );
+      // return res.status(400).send("No files were uploaded.");
+    } else {
+      // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+      let picture = req.files.picture;
+      pictureName = `${Date.now()}-${picture.name}`;
+      let uploadPath = path.join(
+        __dirname,
+        "..",
+        "public",
+        "images",
+        "pictures",
+        pictureName
+      );
+
+      // Use the mv() method to place the file somewhere on your server
+      picture.mv(uploadPath, function (err) {
+        if (err) return res.status(500).send(err);
+        pool.query(
+          "UPDATE goods SET barcode=$1, name=$2, stock=$3, purchaseprice=$4, sellingprice=$5, picture=$6, unit=$7 WHERE barcode=$8",
+          [
+            req.body.barcode,
+            req.body.name,
+            req.body.stock,
+            req.body.purchaseprice,
+            req.body.sellingprice,
+            pictureName,
+            req.body.unit,
+            id,
+          ],
+          function (err) {
+            if (err) {
+              console.error(err);
+              req.flash("error", err.message);
+              return res.redirect(`/goods/edit/${id}`);
+            } else {
+              res.redirect("/goods");
+            }
+          }
+        );
+      });
+    }
   });
 
-  router.post('/edit/:barcode', upload.single('picture'), (req, res, next) => {
-    const barcode = req.params.barcode;
-    const { name, stock, purchaseprice, sellingprice, unit } = req.body;
-    const picture = req.file ? req.file.filename : null; // Get the filename of the uploaded picture
-
-    pool.query(
-      'UPDATE goods SET name = $1, stock = $2, purchaseprice = $3, sellingprice = $4, unit = $5, picture = $6 WHERE barcode = $7',
-      [name, stock, purchaseprice, sellingprice, unit, picture, barcode],
-      (error, result) => {
-        if (error) {
-          console.error('Error updating goods data:', error);
-          res.sendStatus(500); // Respond with an appropriate status code indicating the failure
-        } else {
-          console.log('Goods updated successfully');
-          res.redirect('/goods');
-        }
-      }
-    )
-  })
-
-  router.get('/delete/:barcode', (req, res) => {
-    const barcode = req.params.barcode;
-
-    pool.query('DELETE FROM goods WHERE barcode = $1', [barcode], (err, result) => {
+  router.get("/delete/:id", (req, res) => {
+    const id = req.params.id;
+    pool.query("delete from goods where barcode = $1", [id], (err) => {
       if (err) {
-        console.error('Error deleting goods:', err);
-        res.sendStatus(500); // Respond with an appropriate status code indicating the failure
-      } else {
-        console.log('Goods deleted successfully');
-        res.redirect('/goods'); // Redirect to the goods list page after deletion
+        console.log("hapus data Goods gagal");
+        req.flash("error", err.message);
+        return res.redirect(`/`);
       }
+      res.redirect("/goods");
     });
   });
 
   return router;
-}
+};
