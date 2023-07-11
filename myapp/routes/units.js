@@ -79,11 +79,11 @@ module.exports = (pool) => {
 
 
   router.get('/edit/:userid', function (req, res, next) {
-    const unit = req.params.unit;
+    const unitId = req.params.unit;
     const name = req.session.user?.name;
   
     // Fetch the user data from the database based on the userid
-    pool.query('SELECT * FROM units WHERE unit = $1', [unit], (error, result) => {
+    pool.query('SELECT * FROM units WHERE unit = $1', [unitId], (error, result) => {
       if (error) {
         console.error('Error retrieving user data:', error);
         // Handle the error and render an error page
@@ -95,12 +95,12 @@ module.exports = (pool) => {
   });
 
   router.post('/edit/:userid', (req, res, next) => {
-    const userId = req.params.userid
-    const { email, name, password, role } = req.body
+    const unitId = req.params.unit
+    const { unit, name, note, } = req.body
 
     pool.query(
-      'UPDATE units SET email = $1, name = $2, password = $3, role = $4 WHERE userid = $5',
-      [email, name, password, role, userId],
+      'UPDATE units SET unit = $1, name = $2, note = $3 WHERE unit = $4',
+      [unit, name, note, unitId],
       (error, result) => {
         if (error) {
           console.error('Error updating user data:', error);

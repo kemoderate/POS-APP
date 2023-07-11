@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
 const bodyParser = require('body-parser');
+var flash = require("connect-flash");
+const fileUpload = require("express-fileupload");
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -18,6 +20,7 @@ const pool = new Pool({
 const indexRouter = require('./routes/index')(pool);
 const usersRouter = require('./routes/users')(pool);
 const unitsRouter = require('./routes/units')(pool);
+const goodsRouter = require('./routes/goods')(pool);
 
 
 var app = express();
@@ -44,10 +47,14 @@ app.use((req, res, next) => {
   res.locals.username = req.session.name; // Make session name available as a local variable
   next();
 });
+app.use(flash());
+//default options
+app.use(fileUpload());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/units', unitsRouter);
+app.use('/goods', goodsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
