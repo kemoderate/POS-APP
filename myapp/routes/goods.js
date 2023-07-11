@@ -118,9 +118,10 @@ module.exports = function (pool) {
     });
   });
 
-  router.get("/edit/:id", isLoggedIn, isAdmin, (req, res) => {
+  router.get("/edit/:id", isLoggedIn, (req, res) => {
     const id = req.params.id;
     const stockAlert = req.session.stockAlert;
+    const name = req.session.user?.name;
     pool.query("select * from goods where barcode = $1", [id], (err, items) => {
       pool.query("select * from units", (err, data) => {
         if (err) {
@@ -133,6 +134,7 @@ module.exports = function (pool) {
           user: req.session.user,
           stockAlert,
           error: req.flash("error"),
+          name : name
         });
       });
     });
