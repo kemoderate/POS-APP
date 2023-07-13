@@ -87,12 +87,12 @@
                           <td class="hidden"><%= user.userid %></td>
                               <td>
                                 <a class="btn btn-success btn-circle" href="/users/edit/<%= user.userid %>">
-                                  <span class="icon text-white-50">
+                                  <span>
                                     <i class="fas fa-info-circle"></i>
                                   </span>
                                 </a>
                               <a class="btn btn-danger btn-circle delete-btn" href="#" data-id="<%= user.userid %>" data-toggle="modal" data-target="#deleteModal">
-                                <span class="icon text-white-50">
+                                <span>
                                   <i class="fas fa-trash"></i>
                                 </span>
                               </a>
@@ -172,24 +172,37 @@
   <!-- Page level custom scripts -->
   <script src="/sbadmin/js/demo/datatables-demo.js"></script>
 
-    <script>
-      // Get the confirm delete button in the modal
-      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  <script>
+    $(document).ready(function () {
+      var deleteId;
 
-      // Attach click event listeners to each delete button
-      const deleteButtons = document.querySelectorAll('.delete-btn');
-      deleteButtons.forEach((button) => {
-        button.addEventListener('click', (event) => {
-          event.preventDefault();
-
-          // Retrieve the user ID from the data-id attribute
-          const userId = button.dataset.id;
-
-          // Set the URL for the delete request
-          confirmDeleteBtn.href = `/users/delete/${userId}`;
-        });
+      $(document).on('click', '.btn-danger', function (event) {
+        event.preventDefault();
+        deleteId = $(this).data('id');
+        $('#deleteModal').modal('show');
       });
-    </script>
+
+      $('#confirmDeleteBtn').on('click', function (event) {
+        event.preventDefault();
+        if (deleteId) {
+          $.ajax({
+            url: '/users/delete/' + deleteId,
+            type: 'GET',
+            success: function () {
+              console.log('Data berhasil dihapus');
+              $('#deleteModal').modal('hide');
+              location.reload(); // Memuat ulang halaman setelah penghapusan berhasil
+            },
+            error: function () {
+              console.log('Terjadi kesalahan saat menghapus data');
+            }
+          });
+        }
+      });
+    });
+  </script>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
     <script>
       $(document).ready(function () {
         $('#example').DataTable({
@@ -207,12 +220,12 @@
                 return `
                         <td>
                             <a class="btn btn-success btn-circle" href="/users/edit/${row.userid}">
-                                <span class="icon text-white-50">
+                                <span>
                                     <i class="fas fa-info-circle"></i>
                                 </span>
                             </a>
                             <a class="btn btn-danger btn-circle" href="#" data-toggle="modal" data-id="${row.userid}" data-target="#deleteModal">
-                                <span class="icon text-white-50">
+                                <span>
                                     <i class="fas fa-trash"></i>
                                 </span>
                             </a>

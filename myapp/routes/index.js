@@ -83,10 +83,9 @@ module.exports = (pool) => {
   router.post('/register', async (req, res) => {
     const { email, name, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const userid = uuidv4(); // Generate a unique userid using uuidv4()
   
     try {
-      await pool.query('INSERT INTO users (userid, email, name, password, role) VALUES ($1, $2, $3, $4, $5)', [userid, email, name, hashedPassword, 'operator']);
+      await pool.query('INSERT INTO users (userid, email, name, password, role) VALUES ($1, $2, $3, $4, $5)', [userid, email, name, hashedPassword, 'operator' || 'admin']);
       res.redirect('/');
     } catch (error) {
       console.error('Error inserting user:', error);

@@ -92,7 +92,7 @@ module.exports = (pool) => {
                 // Handle the error and render an error page
             } else {
                 const suppliers = result.rows[0];
-                res.render('addsuppliers', { title: 'Edit Suppliers', data: suppliers, name : name, error: req.flash("error"), });
+                res.render('addsuppliers', { title: 'Edit Suppliers', data: suppliers, name : name, error: req.flash("error"), renderFrom: "edit", });
             }
         });
     });

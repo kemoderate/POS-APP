@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const saltRounds = 10;
 
 /* GET users listing. */
 module.exports = (pool) => {
@@ -58,15 +59,17 @@ module.exports = (pool) => {
         res.render('adduser', {
           title: 'User Add',
           data: result.rows,
-          name: name
+          name: name,
+          renderFrom : 'add'
         });
       }
     });
   });
 
-  router.post('/add', (req, res) => {
+  router.post('/add', async (req, res) => {
     const { email, name, password, role } = req.body;
-    pool.query('INSERT INTO users (email, name, password, role) VALUES ($1, $2, $3, $4)', [email, name, password, role], (err, result) => {
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    pool.query('INSERT INTO users (email, name, password, role) VALUES ($1, $2, $3, $4)', [email, name, hashedPassword, role], (err, result) => {
       if (err) {
         console.error('Error inserting user:', err);
         // Handle the error, e.g., render an error page
@@ -89,7 +92,12 @@ module.exports = (pool) => {
         // Handle the error and render an error page
       } else {
         const user = result.rows[0];
-        res.render('adduser', { title: 'Edit User', data: user, name: name });
+        res.render('adduser', 
+        { title: 'Edit User', 
+        data: user, 
+        name: name ,
+        renderFrom : 'edit'
+      });
       }
     });
   });
@@ -113,18 +121,15 @@ module.exports = (pool) => {
     )
   })
 
-
-  router.get('/delete/:userid', (req, res) => {
-    const userid = req.params.userid;
-
-    pool.query('DELETE FROM users WHERE userid = $1', [userid], (err, result) => {
+  router.get("/delete/:id", (req, res) => {
+    const id = req.params.id;
+    pool.query("delete from users where userid = $1", [id], (err) => {
       if (err) {
-        console.error('Error deleting user:', err);
-        res.sendStatus(500); // Respond with an appropriate status code indicating the failure
-      } else {
-        console.log('User deleted successfully');
-        res.redirect('/users'); // Redirect to the user list page after deletion
+        console.log("hapus data Goods gagal");
+        req.flash("error", err.message);
+        return res.redirect(`/`);
       }
+      res.redirect("/goods");
     });
   });
   
