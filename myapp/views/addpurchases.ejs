@@ -71,7 +71,7 @@
                   <div class="col-md-4">
                     <label for="operator" class="form-label">Operator</label>
                     <div class="input-group has-validation">
-                      <input type="text" class="form-control" id="operator" aria-describedby="inputGroupPrepend" readonly>
+                      <input type="text" class="form-control" id="operator" aria-describedby="inputGroupPrepend" value="<%= name %>" readonly>
                       <div class="invalid-feedback">
                       </div>
                     </div>
@@ -81,8 +81,10 @@
                     <label for="selectBarcode" class="form-label">Goods Barcode</label>
                     <select name="barcode" class="form-select" aria-label="Default select example" id="selectBarcode">
                       <option>Open this select menu</option>
-                      
-                        <option </option>
+                      <% datagood.forEach(good => { %>
+                        <option value="<%= good.barcode.toString() %>"><%= good.barcode.toString() %> - <%= good.name.toString() %></option>
+                      <% }); %>
+          
                       
                     </select>
                   </div>
@@ -153,11 +155,10 @@
                     <div class="col-sm-10">
                       <select name="supply" class="form-select" aria-label="Default select example" id="supply">
                         <option>Open this select menu</option>
-                        
-                          <option   </option>
-                        
+                        <% datasupply.forEach(item => { %>
+                          <option value="<%=item.supplierid%>" <%= item.supplierid === data.supplier ? 'selected' : '' %>><%=item.name%></option>
+                        <% }) %>
                       </select>
-                      
                     </div>
                   </div>
                 </div>
@@ -215,6 +216,151 @@
     <!-- Page level custom scripts -->
     <script src="/javascripts/chart-area-demo.js"></script>
     <script src="/javascripts/chart-pie-demo.js"></script>
+
+    <script>
+      let invoice = '<%= data.invoice %>';
+          $(document).ready(function() {
+            const selectBarcode = $('#selectBarcode');
+            const inputGoodsName = $('#namegoods');
+            const inputStock = $('#stockgoods');
+            const inputPurchasePrice = $('#purchasepricegoods');
+            const inputqty = $('#qtygoods');
+            const inputtotal = $('#totalprice');
+    
+                $('#add').on('click', function(event) {
+                  event.preventDefault();
+    
+                  $.ajax({
+                    url: '/purchases/add/items',
+                    method: 'POST',
+                    data: {
+                      invoice: $('#invoice').val(),
+                      barcode: $('#selectBarcode').val(),
+                      qtygoods: $('#qtygoods').val(),
+                      purchasepricegoods: $('#purchasepricegoods').val(),
+                      totalprice: $('#totalprice').val()
+                    },
+                    success: function(response) {
+                      readTable()
+    
+                    },
+                    error: function(err) {
+                      console.log(err);
+                    }
+                  });
+                });
+    
+            selectBarcode.on('change', function() {
+              const selectedBarcode = selectBarcode.val();
+        
+              $.ajax({
+                url: `/purchases/get/${selectedBarcode}`, // Endpoint router yang sesuai
+                method: 'GET',
+                success: function(response) {
+                  // Response berisi data dari router
+                  const selectedGood = response[0];
+        
+                  // Mengisi nilai input dengan data terkait
+                  inputGoodsName.val(selectedGood.name || '');
+                  inputStock.val(selectedGood.stock || '');
+                  inputPurchasePrice.val(selectedGood.purchaseprice || '');
+                  inputqty.val('0');
+                  inputtotal.val('0');
+                },
+                error: function(err) {
+                  console.log(err);
+                }
+              });
+            });
+        
+            inputqty.on('input', function() {
+              calculateTotalPrice();
+            });
+        
+            function calculateTotalPrice() {
+              const qty = parseFloat(inputqty.val());
+              const purchasePrice = parseFloat(inputPurchasePrice.val());
+              if (!isNaN(qty) && !isNaN(purchasePrice)) {
+                const totalprice = qty * purchasePrice;
+                inputtotal.val('Rp ' + numeral(totalprice.toFixed(2)).format('0,0.00'));
+              }
+            }
+            readTable()
+          });
+          function calculateTotalAllPrice() {
+              const total = $('#totalsum');
+              var totalHarga = 0;
+        
+              $('.table-row').each(function() {
+                var harga = parseFloat($(this).find('td:eq(5)').text().replace('Rp', '').replace(',', '').replace('.', ''));
+        
+                if (!isNaN(harga)) {
+                  totalHarga += harga;
+                }
+              });
+        
+              var hargaFormatted = (totalHarga / 100).toFixed(2);
+              total.val('Rp ' + numeral(hargaFormatted).format('0,0.00'));
+            }
+            let iddelete;
+          // Fungsi untuk membaca tabel
+          const readTable = () => {
+            $.get(`/purchases/get/edit/item/${invoice}`).done((data) => {
+      let html = '';
+      data.forEach((item, index) => {
+        iddelete = item.id
+        const formattedTotalPrice = 'Rp ' + numeral(item.totalprice).format('Rp0,0.00');
+        html += `
+          <tr class="table-row">
+            <td>${index + 1}</td>
+            <td>${item.itemcode}</td>
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${item.purchaseprice}</td>
+            <td>${formattedTotalPrice}</td>
+            <td>
+              <a href="#" class="btn btn-circle btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal${item.id}">
+                <i class="fas fa-solid fa-trash"></i>
+              </a>
+              <div class="modal fade" id="deleteModal${item.id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">Konfirmasi Penghapusan</h5>
+                      <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">Apakah Anda yakin ingin menghapusnya?</div>
+                    <div class="modal-footer">
+                      <button class="btn btn-secondary" type="button" data-dismiss="modal">Tidak</button>
+                      <a class="btn btn-primary" href="/purchases/deleteitems/${item.id}">Ya</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+      $('#purchaseitem').html(html);
+      calculateTotalAllPrice();
+    });
+    
+    };
+    
+    var alerts = document.getElementById('alert')
+    var navbar = document.getElementById('navbar');
+    var users = document.getElementById('Users');
+    var collapseUtilities = document.getElementById('Utilities');
+    
+      if ('<%= user.role %>' !== 'admin') {
+        navbar.remove()
+        users.remove()
+        collapseUtilities.remove()
+        alerts.remove()
+    }
+        </script>
    
   </body>
 </html>

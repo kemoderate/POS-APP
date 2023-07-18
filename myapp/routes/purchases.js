@@ -50,21 +50,27 @@ router.get('/', isLoggedIn, function (req, res, next) {
 
 
 router.get("/add", isLoggedIn, (req, res) => {
-  const stockAlert = req.session.stockAlert;
   const name = req.session.user?.name;
-  pool.query("select * from units", (err, data) => {
+  const stockAlert = req.session.stockAlert;
+  pool.query("select * from units", (err, dataunit) => {
+    pool.query("select * from goods", (err, datagoods) => {
+      pool.query("select * from suppliers", (err, datasupply) => {          
   res.render("addpurchases", {
     data: {},
-    dataunit : data.rows,
-    renderFrom: "add",
+    dataunit : dataunit.rows,
+    datagood: datagoods.rows,
+    datasupply: datasupply.rows,
     user: req.session.user,
     stockAlert,
     error: req.flash("error"),
-    name: name,
     moment,
+    name: name
   });
 });
 });
+});
+});
+
 
 router.post("/add", (req, res) => {
   const { invoice, time, totalsum, supplierid, operator } = req.body;
