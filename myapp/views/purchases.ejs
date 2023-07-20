@@ -63,7 +63,7 @@
                           <th>Invoice</th>
                           <th>Time</th>
                           <th>Total Sum</th>
-                          <th>Supplier ID</th>
+                          <th>Supplier </th>
                           <th>Operator</th>
                           <th>Action</th>
                         </tr>
@@ -73,7 +73,7 @@
                           <th>Invoice</th>
                           <th>Time</th>
                           <th>Total Sum</th>
-                          <th>Supplier ID</th>
+                          <th>Supplier </th>
                           <th>Operator</th>
                           <th>Action</th>
                         </tr>
@@ -142,12 +142,8 @@
 
     <script>
       $(document).ready(function () {
-        $("#purchasesid").on("click", ".delete-btn", function (e) {
-      e.preventDefault();
-      const invoice = $(this).data("id");
-      $("#confirmDeleteBtn").attr("href", `/purchases/delete/${invoice}`);
-    });
-        $('#purchasesid').DataTable({
+        // DataTable initialization
+        const dataTable = $('#purchasesid').DataTable({
           "lengthMenu": [[3, 10, 100], [3, 10, "All"]],
           "processing": true,
           "serverSide": true,
@@ -156,32 +152,36 @@
             { "data": "invoice" },
             { "data": "time" },
             { "data": "totalsum" },
-            { "data": "supplierid" },
+            { "data": "supplier.name" },
             { "data": "operator" },
             {
               "render": function (data, type, row) {
                 return `
-      <td>
-        <a class="btn btn-success btn-circle" href="/purchases/edit/${row.invoice}">
-          <span class="icon text-white-50">
-            <i class="fas fa-info-circle"></i>
-          </span>
-        </a>
-        <a class="btn btn-danger btn-circle delete-btn" href="#" data-id="${row.invoice}" data-toggle="modal" data-target="#deleteModal">
-          <span class="icon text-white-50">
-            <i class="fas fa-trash"></i>
-          </span>
-        </a>
-        <span></span>
-      </td>
-    `;
+                  <td>
+                    <a class="btn btn-success btn-circle" href="/purchases/edit/${row.invoice}">
+                      <span class="icon text-white-50">
+                        <i class="fas fa-info-circle"></i>
+                      </span>
+                    </a>
+                    <a class="btn btn-danger btn-circle delete-btn" href="#" data-id="${row.invoice}" data-toggle="modal" data-target="#deleteModal">
+                      <span class="icon text-white-50">
+                        <i class="fas fa-trash"></i>
+                      </span>
+                    </a>
+                    <span></span>
+                  </td>
+                `;
               }
             }
-
           ]
         });
+        // Optional: Refresh the DataTable periodically (for live updates, if needed)
+        // setInterval(() => {
+        //   dataTable.ajax.reload(null, false); // false means keep the current paging position
+        // }, 5000);
       });
     </script>
+    
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
 

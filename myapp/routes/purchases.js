@@ -7,39 +7,43 @@ var moment = require("moment");
 module.exports = (pool) => {
 
   router.get('/datatable', async (req, res) => {
-    let params = [];
-  
-    if (req.query.search.value) {
-      params.push(`string ilike '%${req.query.search.value}%'`);
-    }
-    const limit = req.query.length;
-    const offset = req.query.start;
-    const sortBy = req.query.columns[req.query.order[0].column].data;
-    const sortMode = req.query.order[0].dir;
-  
-    // Perform a join to fetch the operator's name
-    const query = `
-      SELECT purchases.*, users.name AS operatorname
-      FROM purchases
-      LEFT JOIN users ON purchases.operator = users.userid
-      ${params.length > 0 ? `WHERE ${params.join(' OR ')}` : ''}
-      ORDER BY ${sortBy} ${sortMode}
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `;
-  
     try {
-      const total = await pool.query(`SELECT COUNT(*) AS total FROM purchases ${params.length > 0 ? `WHERE ${params.join(' OR ')}` : ''}`);
-      const data = await pool.query(query);
+      const { search, length, start, columns, order, draw } = req.query;
+      const searchValue = search.value ? `%${search.value}%` : '';
+      const limit = length;
+      const offset = start;
+      const sortBy = columns[order[0].column].data;
+      const sortMode = order[0].dir;
+  
+      // Use parameterized query to prevent SQL injection
+      const query = `
+        SELECT purchases.*, suppliers.name AS supplier, users.name AS operatorname
+        FROM purchases
+        LEFT JOIN suppliers ON purchases.supplierid = suppliers.supplierid
+        LEFT JOIN users ON purchases.operator = users.userid
+        WHERE purchases.column1 ilike $1 OR purchases.column2 ilike $1 OR suppliers.name ilike $1
+        ORDER BY ${sortBy} ${sortMode}
+        LIMIT $2
+        OFFSET $3
+      `;
+  
+      // Using Promise.all to perform both queries in parallel
+      const [totalResult, dataResult] = await Promise.all([
+        pool.query('SELECT COUNT(*) AS total FROM purchases WHERE column1 ilike $1 OR column2 ilike $1 OR supplierid ilike $1', [searchValue]),
+        pool.query(query, [searchValue, limit, offset])
+      ]);
+  
+      const total = totalResult.rows[0].total;
+      const data = dataResult.rows.map((row) => ({
+        ...row,
+        operator: row.operatorname, // Replace the operator id with the operator name
+      }));
   
       const response = {
-        "draw": Number(req.query.draw),
-        "recordsTotal": total.rows[0].total,
-        "recordsFiltered": total.rows[0].total,
-        "data": data.rows.map((row) => ({
-          ...row,
-          operator: row.operatorname, // Replace the operator id with the operator name
-        })),
+        "draw": Number(draw),
+        "recordsTotal": total,
+        "recordsFiltered": total,
+        "data": data,
       };
       res.json(response);
     } catch (err) {
@@ -47,6 +51,9 @@ module.exports = (pool) => {
       res.status(500).json({ message: "Error fetching data from the database." });
     }
   });
+  
+  
+  
   
 
 
@@ -145,23 +152,24 @@ router.get("/get/:barcode", (req,res) => {
 })
 
 
-  
-
-  router.post("/add", (req, res) => {
-    const { invoice, time, totalsum, supplierid, operator } = req.body;
-    pool.query(
-      "INSERT INTO purchases (invoice, time, totalsum, supplierid, operator) VALUES ($1, $2, $3, $4, $5)",
-      [invoice, time, totalsum, supplierid, operator],
-      (err, data) => {
-        if (err) {
-          console.log(err);
-          req.flash("error", err.message);
-          return res.redirect("/purchases/add");
-        }
-        res.redirect("/purchases");
+router.post("/add", (req, res) => {
+  const { invoice, time, totalsum, supplierid, operator } = req.body;
+  pool.query(
+    "INSERT INTO purchases (invoice, time, totalsum, supplierid, operator) VALUES ($1, $2, $3, $4, $5)",
+    [invoice, time, totalsum, supplierid, operator],
+    (err, data) => {
+      if (err) {
+        console.log(err);
+        req.flash("error", err.message);
+        return res.redirect("/purchases/add");
       }
-    );
-  });
+      res.redirect("/purchases");
+    }
+  );
+});
+
+
+ 
 
   router.post("/add/items", (req, res) => {
     const purchasePrice = parseFloat(
