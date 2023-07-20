@@ -39,9 +39,7 @@ module.exports = (pool) => {
             } else {
               if (bcryptResult) {
                 req.session.authenticated = true;
-                req.session.user = {
-                  name: user.name // Store the name field in the session
-              };
+                req.session.user = user
                 res.redirect('/');
               } else {
                 res.render('login', { title: 'Dashboard', showLoginForm: true, error: 'Invalid email or password' });
@@ -57,6 +55,7 @@ module.exports = (pool) => {
 
   router.get('/', isLoggedIn, (req, res) => {
     if (req.session.authenticated) {
+      const userid = req.session.user;
       const name = req.session.user.name;
         res.render('index', { title: 'Dashboard', name: name });
     } else {

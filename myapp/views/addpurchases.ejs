@@ -1,43 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
-    <script
-      src="https://kit.fontawesome.com/6ea2cb925f.js"
-      crossorigin="anonymous"
-    ></script>
-    <title>POS - Purchases</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
-    <!-- Custom fonts for this template-->
-    <link rel="stylesheet" href="/stylesheets/all.min.css" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <script src="https://kit.fontawesome.com/6ea2cb925f.js" crossorigin="anonymous"></script>
+  <title>POS - Purchases</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
-    <!-- Custom styles for this template-->
-    <link rel="stylesheet" href="/stylesheets/sb-admin-2.min.css" />
-    <style>
-        #output {
-          max-width: 400px; /* Sesuaikan lebar maksimum yang diinginkan */
-          height: auto;
-        }
-      </style>
-  </head>
+  <!-- Custom fonts for this template-->
+  <link rel="stylesheet" href="/stylesheets/all.min.css" />
+  <link
+    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    rel="stylesheet" />
 
-  <body id="page-top">
-    <!-- Page Wrapper -->
-    <div id="wrapper">
-      <!-- Sidebar -->
-      <%- include('partials/sidebar.ejs') %>
+  <!-- Custom styles for this template-->
+  <link rel="stylesheet" href="/stylesheets/sb-admin-2.min.css" />
+  <style>
+    #output {
+      max-width: 400px;
+      /* Sesuaikan lebar maksimum yang diinginkan */
+      height: auto;
+    }
+  </style>
+</head>
+
+<body id="page-top">
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+    <!-- Sidebar -->
+    <%- include('partials/sidebar.ejs') %>
       <!-- End of Sidebar -->
 
       <!-- Content Wrapper -->
@@ -46,65 +41,72 @@
         <div id="content">
           <!-- Topbar -->
           <%- include('partials/topbar.ejs', { name: name }) %>
-          <!-- End of Topbar -->
-          <div class="container-fluid">
-            <!-- Begin Page Content -->
-            <h1 class="h3 mb-2 text-gray-800">Purchases</h1>
-            <div class="card shadow mb-4">
-              <div class="card-header py-3">
-                    <span class="m-0 font-weight-bold text-primary">Transactions</span>
-              </div>
-            <div class="card-body">
-              <form action="/purchases/add/purchases" method="post" class="row g-3 needs-validation" novalidate>
-                  <div class="col-md-4">
-                    <label for="invoice" class="form-label">Invoice</label>
-                    <input type="text" class="form-control" id="invoice" name="invoice" value="<%= data.invoice %>" readonly>
-                    <div class="valid-feedback">
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <label for="time" class="form-label">Time</label>
-                    <input type="text" class="form-control" id="time" value="<%= moment(data.time).format('dddd, MMMM Do YYYY, h:mm:ss a') %>" readonly>
-                    <div class="valid-feedback">
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <label for="operator" class="form-label">Operator</label>
-                    <div class="input-group has-validation">
-                      <input type="text" class="form-control" id="operator" aria-describedby="inputGroupPrepend" value="<%= name %>" readonly>
-                      <div class="invalid-feedback">
+            <!-- End of Topbar -->
+            <div class="container-fluid">
+              <!-- Begin Page Content -->
+              <h1 class="h3 mb-2 text-gray-800">Purchases</h1>
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <span class="m-0 font-weight-bold text-primary">Transactions</span>
+                </div>
+                <div class="card-body">
+                  <form action="/purchases/add/purchases" method="post" class="row g-3 needs-validation" novalidate>
+                    <div class="col-md-4">
+                      <label for="invoice" class="form-label">Invoice</label>
+                      <input type="text" class="form-control" id="invoice" name="invoice" value="<%= data.invoice %>"
+                        readonly>
+                      <div class="valid-feedback">
                       </div>
                     </div>
-                  </div>
-                  <hr style="height:20px;padding-top:30px;">
-                  <div class="col-md-4">
-                    <label for="selectBarcode" class="form-label">Goods Barcode</label>
-                    <select name="barcode" class="form-select" aria-label="Default select example" id="selectBarcode">
-                      <option>Open this select menu</option>
-                      <% datagood.forEach(good => { %>
-                        <option value="<%= good.barcode.toString() %>"><%= good.barcode.toString() %> - <%= good.name.toString() %></option>
-                      <% }); %>
-          
-                      
-                    </select>
-                  </div>
-                  <div class="col-md-4">
-                    <label for="namegoods" class="form-label">Goods Name</label>
-                    <input type="text" class="form-control" id="namegoods" value="" readonly>
-                    <div class="valid-feedback"></div>
-                  </div>
-                  <div class="col-md-4">
-                    <label for="stockgoods" class="form-label">Stock</label>
-                    <div class="input-group has-validation">
-                      <input type="text" class="form-control" id="stockgoods" name="stockgoods" aria-describedby="inputGroupPrepend" readonly>
-                      
+                    <div class="col-md-4">
+                      <label for="time" class="form-label">Time</label>
+                      <input type="text" class="form-control" id="time"
+                        value="<%= moment(data.time).format('dddd, MMMM Do YYYY, h:mm:ss a') %>" readonly>
+                      <div class="valid-feedback">
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-md-4">
-                    <label for="purchasepricegoods" class="form-label">Purchase Price</label>
-                    <input type="text" class="form-control" id="purchasepricegoods" name="purchasepricegoods" value="" required>
-                    
-                  </div>
+                    <div class="col-md-4">
+                      <label for="operator" class="form-label">Operator</label>
+                      <div class="input-group has-validation">
+                        <input type="text" class="form-control" id="operator" aria-describedby="inputGroupPrepend"
+                          value="<%= dataa.name %>" readonly>
+                        <div class="invalid-feedback">
+                        </div>
+                      </div>
+                    </div>
+                    <hr style="height:20px;padding-top:30px;">
+                    <div class="col-md-4">
+                      <label for="selectBarcode" class="form-label">Goods Barcode</label>
+                      <select name="barcode" class="form-select" aria-label="Default select example" id="selectBarcode">
+                        <option>Open this select menu</option>
+                        <% datagood.forEach(good=> { %>
+                          <option value="<%= good.barcode.toString() %>">
+                            <%= good.barcode.toString() %> - <%= good.name.toString() %>
+                          </option>
+                          <% }); %>
+
+
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label for="namegoods" class="form-label">Goods Name</label>
+                      <input type="text" class="form-control" id="namegoods" value="" readonly>
+                      <div class="valid-feedback"></div>
+                    </div>
+                    <div class="col-md-4">
+                      <label for="stockgoods" class="form-label">Stock</label>
+                      <div class="input-group has-validation">
+                        <input type="text" class="form-control" id="stockgoods" name="stockgoods"
+                          aria-describedby="inputGroupPrepend" readonly>
+
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <label for="purchasepricegoods" class="form-label">Purchase Price</label>
+                      <input type="text" class="form-control" id="purchasepricegoods" name="purchasepricegoods" value=""
+                        required>
+
+                    </div>
                     <div class="col-md-4">
                       <label for="qtygoods" class="form-label">Qty</label>
                       <input type="text" class="form-control" id="qtygoods" name="qtygoods" value="" required>
@@ -114,7 +116,8 @@
                     <div class="col-md-4">
                       <label for="totalprice" class="form-label">Total Price</label>
                       <div class="input-group has-validation">
-                        <input type="text" class="form-control" id="totalprice" name="totalprice" aria-describedby="inputGroupPrepend" required>
+                        <input type="text" class="form-control" id="totalprice" name="totalprice"
+                          aria-describedby="inputGroupPrepend" required>
                         <div class="invalid-feedback">
                         </div>
                       </div>
@@ -126,241 +129,246 @@
                         </span>
                         <span class="text">Add</span>
                       </button>
-                  </div>
-                  <table class="table table-striped" id="purchaseitems">
-                    <thead>
-                      <tr>
-                        <th>No.</th>
-                      <th>Barcode</th>
-                      <th>Name</th>
-                      <th>Qty</th>
-                      <th>Price</th>
-                      <th>Total Price</th>
-                      <th>Action</th>
-                    </tr>
-                    </thead>
-                    <tbody id="purchaseitem">
-                      
-                    </tbody>
-                  </table>
-                  
-                  <div class="row mb-3">
-                    <label for="totalsum" class="col-sm-2 col-form-label">Total Summary</label>
-                    <div class="col-sm-10">
-                      <input type="text" class="form-control" name="totalsum" id="totalsum" >
                     </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="supply" class="col-sm-2 col-form-label">Supplier</label>
-                    <div class="col-sm-10">
-                      <select name="supply" class="form-select" aria-label="Default select example" id="supply">
-                        <option>Open this select menu</option>
-                        <% datasupply.forEach(item => { %>
-                          <option value="<%=item.supplierid%>" <%= item.supplierid === data.supplier ? 'selected' : '' %>><%=item.name%></option>
-                        <% }) %>
-                      </select>
+                    <table class="table table-striped" id="purchaseitems">
+                      <thead>
+                        <tr>
+                          <th>No.</th>
+                          <th>Barcode</th>
+                          <th>Name</th>
+                          <th>Qty</th>
+                          <th>Price</th>
+                          <th>Total Price</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody id="purchaseitem">
+
+                      </tbody>
+                    </table>
+
+                    <div class="row mb-3">
+                      <label for="totalsum" class="col-sm-2 col-form-label">Total Summary</label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" name="totalsum" id="totalsum" readonly>
+                      </div>
                     </div>
-                  </div>
+                    <div class="row mb-3">
+                      <label for="supply" class="col-sm-2 col-form-label">Supplier</label>
+                      <div class="col-sm-10">
+                        <select name="supply" class="form-select" aria-label="Default select example" id="supply">
+                          <option>Open this select menu</option>
+                          <% datasupply.forEach(item=> { %>
+                            <option value="<%=item.supplierid%>" <%=item.supplierid===data.supplier ? 'selected' : '' %>
+                              ><%=item.name%>
+                            </option>
+                            <% }) %>
+                        </select>
+                      </div>
+                    </div>
                 </div>
                 <br><br>
                 <div class="card-header py-3">
                   <button type="submit" id="submitAll" class="btn btn-success btn-icon-split">
                     <span class="icon text-white-50">
-                        <i class="fa-solid fa-plus"></i>
+                      <i class="fa-solid fa-plus"></i>
                     </span>
                     <span class="text">Save</span>
-                </button>
-                <a href="/purchases" class="btn btn-warning btn-icon-split">
+                  </button>
+                  <a href="/purchases" class="btn btn-warning btn-icon-split">
                     <span class="icon text-white-50">
                       <i class="fa-solid fa-arrow-left"></i>
                     </span>
                     <span class="text">Back</span>
-                </a>
+                  </a>
+                </div>
+                </form>
+              </div>
+
+              <!-- /.container-fluid -->
             </div>
-              </form>
-          </div>
-  
-          <!-- /.container-fluid -->
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <%- include('partials/footer.ejs') %>
+              <!-- End of Footer -->
         </div>
-        <!-- End of Main Content -->
-
-        <!-- Footer -->
-        <%- include('partials/footer.ejs') %>
-        <!-- End of Footer -->
+        <!-- End of Content Wrapper -->
       </div>
-      <!-- End of Content Wrapper -->
-    </div>
-    <!-- End of Page Wrapper -->
+      <!-- End of Page Wrapper -->
 
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-      <i class="fas fa-angle-up"></i>
-    </a>
+      <!-- Scroll to Top Button-->
+      <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+      </a>
 
-    <!-- Logout Modal-->
-    <%- include('partials/logoutModal.ejs') %>
+      <!-- Logout Modal-->
+      <%- include('partials/logoutModal.ejs') %>
 
-    <!-- Bootstrap core JavaScript-->
-    <script src="/javascripts/jquery.min.js"></script>
-    <script src="/javascripts/bootstrap.bundle.min.js"></script>
+        <!-- Bootstrap core JavaScript-->
+        <script src="/javascripts/jquery.min.js"></script>
+        <script src="/javascripts/bootstrap.bundle.min.js"></script>
 
-    <!-- Core plugin JavaScript-->
-    <script src="/javascripts/jquery.easing.min.js"></script>
+        <!-- Core plugin JavaScript-->
+        <script src="/javascripts/jquery.easing.min.js"></script>
 
-    <!-- Custom scripts for all pages-->
-    <script src="/javascripts/sb-admin-2.min.js"></script>
+        <!-- Custom scripts for all pages-->
+        <script src="/javascripts/sb-admin-2.min.js"></script>
 
-    <!-- Page level plugins -->
-    <script src="/javascripts/Chart.min.js"></script>
+        <!-- Page level plugins -->
+        <script src="/javascripts/Chart.min.js"></script>
 
-    <!-- Page level custom scripts -->
-    <script src="/javascripts/chart-area-demo.js"></script>
-    <script src="/javascripts/chart-pie-demo.js"></script>
+        <!-- Page level custom scripts -->
+        <script src="/javascripts/chart-area-demo.js"></script>
+        <script src="/javascripts/chart-pie-demo.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
 
-    <script>
-      let invoice = '<%= data.invoice %>';
-          $(document).ready(function() {
+        <script>
+          let invoice = '<%= data.invoice %>';
+
+          $(document).ready(function () {
             const selectBarcode = $('#selectBarcode');
             const inputGoodsName = $('#namegoods');
             const inputStock = $('#stockgoods');
             const inputPurchasePrice = $('#purchasepricegoods');
             const inputqty = $('#qtygoods');
             const inputtotal = $('#totalprice');
-    
-                $('#add').on('click', function(event) {
-                  event.preventDefault();
-    
-                  $.ajax({
-                    url: '/purchases/add/items',
-                    method: 'POST',
-                    data: {
-                      invoice: $('#invoice').val(),
-                      barcode: $('#selectBarcode').val(),
-                      qtygoods: $('#qtygoods').val(),
-                      purchasepricegoods: $('#purchasepricegoods').val(),
-                      totalprice: $('#totalprice').val()
-                    },
-                    success: function(response) {
-                      readTable()
-    
-                    },
-                    error: function(err) {
-                      console.log(err);
-                    }
-                  });
-                });
-    
-            selectBarcode.on('change', function() {
-              const selectedBarcode = selectBarcode.val();
-        
+
+            $('#add').on('click', function (event) {
+              event.preventDefault();
+
               $.ajax({
-                url: `/purchases/get/${selectedBarcode}`, // Endpoint router yang sesuai
+                url: '/purchases/add/items',
+                method: 'POST',
+                data: {
+                  invoice: $('#invoice').val(),
+                  barcode: $('#selectBarcode').val(),
+                  qtygoods: $('#qtygoods').val(),
+                  purchasepricegoods: $('#purchasepricegoods').val(),
+                  totalprice: $('#totalprice').val()
+                },
+                success: function (response) {
+                  readTable();
+                },
+                error: function (err) {
+                  console.log(err);
+                }
+              });
+            });
+
+            selectBarcode.on('change', function () {
+              const selectedBarcode = selectBarcode.val();
+
+              $.ajax({
+                url: `/purchases/get/${selectedBarcode}`,
                 method: 'GET',
-                success: function(response) {
-                  // Response berisi data dari router
+                success: function (response) {
                   const selectedGood = response[0];
-        
-                  // Mengisi nilai input dengan data terkait
+
                   inputGoodsName.val(selectedGood.name || '');
                   inputStock.val(selectedGood.stock || '');
                   inputPurchasePrice.val(selectedGood.purchaseprice || '');
                   inputqty.val('0');
                   inputtotal.val('0');
                 },
-                error: function(err) {
+                error: function (err) {
                   console.log(err);
                 }
               });
             });
-        
-            inputqty.on('input', function() {
+
+            // Event listener for quantity input changes
+            inputqty.on('input', function () {
               calculateTotalPrice();
             });
-        
+
             function calculateTotalPrice() {
               const qty = parseFloat(inputqty.val());
-              const purchasePrice = parseFloat(inputPurchasePrice.val());
+              const purchasePrice = parseFloat(inputPurchasePrice.val().replace(/[^0-9.-]+/g, ""));
               if (!isNaN(qty) && !isNaN(purchasePrice)) {
                 const totalprice = qty * purchasePrice;
-                inputtotal.val('Rp ' + numeral(totalprice.toFixed(2)).format('0,0.00'));
+                const formattedTotalPrice = 'Rp ' + numeral(totalprice).format('0,0.00');
+                inputtotal.val(formattedTotalPrice);
               }
             }
-            readTable()
+
+            readTable();
           });
+
           function calculateTotalAllPrice() {
-              const total = $('#totalsum');
-              var totalHarga = 0;
-        
-              $('.table-row').each(function() {
-                var harga = parseFloat($(this).find('td:eq(5)').text().replace('Rp', '').replace(',', '').replace('.', ''));
-        
-                if (!isNaN(harga)) {
-                  totalHarga += harga;
-                }
-              });
-        
-              var hargaFormatted = (totalHarga / 100).toFixed(2);
-              total.val('Rp ' + numeral(hargaFormatted).format('0,0.00'));
-            }
-            let iddelete;
-          // Fungsi untuk membaca tabel
+            const total = $('#totalsum');
+            var totalHarga = 0;
+
+            $('.table-row').each(function () {
+              var harga = parseFloat($(this).find('td:eq(5)').text().replace('Rp', '').replace(',', '').replace('.', ''));
+
+              if (!isNaN(harga)) {
+                totalHarga += harga;
+              }
+            });
+
+            var hargaFormatted = (totalHarga / 100).toFixed(2);
+            total.val('Rp ' + numeral(hargaFormatted).format('0,0.00'));
+          }
+
+          let iddelete;
+          // Function to read the table
           const readTable = () => {
             $.get(`/purchases/get/edit/item/${invoice}`).done((data) => {
-      let html = '';
-      data.forEach((item, index) => {
-        iddelete = item.id
-        const formattedTotalPrice = 'Rp ' + numeral(item.totalprice).format('Rp0,0.00');
-        html += `
-          <tr class="table-row">
-            <td>${index + 1}</td>
-            <td>${item.itemcode}</td>
-            <td>${item.name}</td>
-            <td>${item.quantity}</td>
-            <td>${item.purchaseprice}</td>
-            <td>${formattedTotalPrice}</td>
-            <td>
-              <a href="#" class="btn btn-circle btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal${item.id}">
-                <i class="fas fa-solid fa-trash"></i>
-              </a>
-              <div class="modal fade" id="deleteModal${item.id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="exampleModalLabel">Konfirmasi Penghapusan</h5>
-                      <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                      </button>
-                    </div>
-                    <div class="modal-body">Apakah Anda yakin ingin menghapusnya?</div>
-                    <div class="modal-footer">
-                      <button class="btn btn-secondary" type="button" data-dismiss="modal">Tidak</button>
-                      <a class="btn btn-primary" href="/purchases/deleteitems/${item.id}">Ya</a>
+              let html = '';
+              data.forEach((item, index) => {
+                iddelete = item.id;
+                const formattedTotalPrice = 'Rp ' + numeral(item.totalprice).format('Rp0,0.00');
+                html += `
+              <tr class="table-row">
+                <td>${index + 1}</td>
+                <td>${item.itemcode}</td>
+                <td>${item.name}</td>
+                <td>${item.quantity}</td>
+                <td>${item.purchaseprice}</td>
+                <td>${formattedTotalPrice}</td>
+                <td>
+                  <a href="#" class="btn btn-circle btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal${item.id}">
+                    <i class="fas fa-solid fa-trash"></i>
+                  </a>
+                  <div class="modal fade" id="deleteModal${item.id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel">Confirm Deletion</h5>
+                          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">Are you sure you want to delete this item?</div>
+                        <div class="modal-footer">
+                          <button class="btn btn-secondary" type="button" data-dismiss="modal">No</button>
+                          <a class="btn btn-primary" href="/purchases/deleteitems/${item.id}">Yes</a>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-        `;
-      });
-      $('#purchaseitem').html(html);
-      calculateTotalAllPrice();
-    });
-    
-    };
-    
-    var alerts = document.getElementById('alert')
-    var navbar = document.getElementById('navbar');
-    var users = document.getElementById('Users');
-    var collapseUtilities = document.getElementById('Utilities');
-    
-      if ('<%= user.role %>' !== 'admin') {
-        navbar.remove()
-        users.remove()
-        collapseUtilities.remove()
-        alerts.remove()
-    }
+                </td>
+              </tr>
+            `;
+              });
+              $('#purchaseitem').html(html);
+              calculateTotalAllPrice();
+            });
+          }
+
+          var alerts = document.getElementById('alert')
+          var navbar = document.getElementById('navbar');
+          var users = document.getElementById('Users');
+          var collapseUtilities = document.getElementById('Utilities');
+
+          if ('<%= user.role %>' !== 'admin') {
+            navbar.remove();
+            users.remove();
+            collapseUtilities.remove();
+            alerts.remove();
+          }
         </script>
-   
-  </body>
+</body>
+
 </html>

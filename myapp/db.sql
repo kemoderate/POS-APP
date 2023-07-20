@@ -1,21 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.users
-(
-    userid uuid NOT NULL DEFAULT uuid_generate_v4(),
-    email text COLLATE pg_catalog."default" NOT NULL,
-    name character varying COLLATE pg_catalog."default" NOT NULL,
-    password character varying COLLATE pg_catalog."default" NOT NULL,
-    role character varying COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT users_pkey PRIMARY KEY (userid)
-)
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.users
-
-
-
--- trigger function dan lainnya
-
-CREATE OR REPLACE FUNCTION updatesale() RETUNS TRIGGER AS $setsale$ 
+CREATE OR REPLACE FUNCTION updatesale() RETURNS TRIGGER AS $setsale$ 
 oldstock INTEGER;
 summary NUMERIC;
 currentinvoice text; 
@@ -29,9 +12,10 @@ ELSEIF (TG_OP = 'DELETE') THEN
 UPDATE goods SET stock = oldstock + OLD.quantity WHERE barcode = OLD.itemcode;
 currentinvoice := OLD.invoice;
 END IF;
+
 -- updatesales
 SELECT sum(totalprice) INTO summary FROM saleitems WHERE invoice = currentinvoice;
-UPDATE sales SET totalsum = COALESCE (summary,0) WHERE invoice = currentinvoice ; 
+UPDATE sales SET totalsum = COALESCE (summary,0) WHERE invoice = currentinvoice; 
 
 RETURN NULL;
 END;
@@ -60,10 +44,71 @@ FOR EACH ROW EXECUTE FUNCTION updatepricesale();
 CREATE OR REPLACE FUNCTION salesinvoice() RETURNS text AS $$
 BEGIN
 
-IF EXIST (SELECT FROM sales WHERE invoice = 'INY-PENJ'|| to_char(current_date,'YYYYMMDD')|| '-1') THEN
-return 'INY-PENJ' || to_char(current_date, 'YYYYMMDD') || '-' || nextval('sales_invoice_seq');
+IF EXIST (SELECT FROM sales WHERE invoice = 'INV-PENJ'|| to_char(current_date,'YYYYMMDD')|| '-1') THEN
+return 'INV-PENJ' || to_char(current_date, 'YYYYMMDD') || '-' || nextval('sales_invoice_seq');
 ELSE
 ALTER SEQUENCE sales_invoice_seq RESTART WITH 1;
-return 'INY-PENJ' || to_char(current_date,'YYYYMMDD') || '-' || nextval('sales_invoice_seq');
+return 'INV-PENJ' || to_char(current_date,'YYYYMMDD') || '-' || nextval('sales_invoice_seq');
 END IF;
 
+END;
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION updatepurchase() RETURNS TRIGGER AS $setpurchase$
+DECLARE
+  oldstock INTEGER;
+  summary NUMERIC;
+  currentinvoice TEXT;
+BEGIN
+  SELECT stock INTO oldstock FROM goods WHERE barcode = NEW.itemcode OR barcode = OLD.itemcode;
+  
+  IF (TG_OP = 'INSERT') THEN
+    UPDATE goods SET stock = oldstock + NEW.quantity WHERE barcode = NEW.itemcode;
+    currentinvoice := NEW.invoice;
+  ELSIF (TG_OP = 'UPDATE') THEN
+    UPDATE goods SET stock = oldstock + OLD.quantity - NEW.quantity WHERE barcode = NEW.itemcode;
+    currentinvoice := OLD.invoice;
+  ELSIF (TG_OP = 'DELETE') THEN
+    UPDATE goods SET stock = oldstock + OLD.quantity WHERE barcode = OLD.itemcode;
+    currentinvoice := OLD.invoice;
+  END IF;
+  
+  -- updatepurchase
+  SELECT sum(totalprice) INTO summary FROM purchaseitems WHERE invoice = currentinvoice;
+  UPDATE purchases SET totalsum = COALESCE(summary, 0) WHERE invoice = currentinvoice;
+  
+  RETURN NULL;
+END;
+$setpurchase$ LANGUAGE plpgsql;
+
+CREATE TRIGGER setpurchase 
+AFTER INSERT OR UPDATE OR DELETE ON purchaseitems
+FOR EACH ROW EXECUTE FUNCTION updatepurchase();
+
+-- update total harga purchase
+CREATE OR REPLACE FUNCTION updatepricepurchase() RETURNS TRIGGER AS $set_totalpricepurchase$
+DECLARE
+  price NUMERIC;
+BEGIN
+  SELECT purchaseprice INTO price FROM goods WHERE barcode = NEW.itemcode;
+  NEW.purchaseprice := price;
+  NEW.totalprice := NEW.quantity * price;
+  RETURN NEW;
+END;
+$set_totalpricepurchase$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_totalpricepurchase
+BEFORE INSERT OR UPDATE ON purchaseitems
+FOR EACH ROW EXECUTE FUNCTION updatepricepurchase();
+
+-- generate invoice for purchase
+CREATE OR REPLACE FUNCTION purchasesinvoice() RETURNS TEXT AS $$
+BEGIN 
+  IF EXISTS (SELECT FROM purchases WHERE invoice = 'INV-' || to_char(current_date, 'YYYYMMDD') || '-1') THEN
+    RETURN 'INV-' || to_char(current_date, 'YYYYMMDD') || '-' || nextval('purchases_invoice_seq');
+  ELSE
+    ALTER SEQUENCE purchases_invoice_seq RESTART WITH 1;
+    RETURN 'INV-' || to_char(current_date, 'YYYYMMDD') || '-' || nextval('purchases_invoice_seq');
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
